@@ -1,11 +1,13 @@
 const express = require('express');
-const cors = require('cors');
-const pizzaRouter = require('./Routes/pizzaRoutes');
+
 const server = express();
+
+const cors = require('cors');
+
+const pizzaRouter = require('./Routes/pizzaRoutes');
 
 server.use(cors());
 server.use(express.json());
-
 server.use(pizzaRouter);
 
 const PORT = 3000;

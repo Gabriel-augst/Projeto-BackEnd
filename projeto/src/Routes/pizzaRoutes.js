@@ -1,58 +1,55 @@
 const express = require('express');
 
+const Pizza = require('./classe.js');
+
 const pizzaRouter = express.Router();
 
-let pizzas = {
-    id: [0, 1, 2, 3],
-    sabor: ["Portuguesa", "Calabresa", "Mista", "Calabresa"],
-    tamanho: ["G", "P", "M", "G"],
-    valor: [12.5, 22.4, 45.4, 34.5]
-}
-
-// {Sabor: {pizzas.sabor[id]}
+let menu = [
+    new Pizza(0, "Portuguesa", "P", 18.5),
+    new Pizza(1, "Calabresa", "M", 22.5),
+    new Pizza(2, "Portuguesa", "G", 25.5),
+    new Pizza(3, "Mista", "P", 15.5)
+]
 
 // Listar Pizzas
 pizzaRouter.get('/pizzas', (req, res) => {
-    return res.json(pizzas);
+    return res.json(menu);
 });
 
 // Listar uma Pizza
 pizzaRouter.get('/pizzas/:id', (req, res) => {
-    const { id } = req.params;
+    let { id } = req.params;
     
-    const pizza = {
-        Sabor: pizzas.sabor[id],
-        Tamanho: pizzas.tamanho[id],
-        Valor: pizzas.valor[id]
-    }
-
-    return res.json(pizza);
+    return res.json(menu[id]);
 });
 
 // Cadastrar uma Pizza
 pizzaRouter.post('/pizzas/cadastrar', (req, res) => {
-    const { nome } = req.body;
-    pizzas.push(nome);
+    const pizza = req.body;
 
-    return res.json(pizzas);
+    const id = menu.length + 1;
+    nova_pizza = new Pizza(id, pizza.sabor, pizza.tamanho, pizza.valor);
+    menu.push(nova_pizza);
+
+    return res.json(menu);
 });
 
-// Atualizar uma Pizza
-pizzaRouter.put('/pizzas/:id', (req, res) => {
+// Atualiza o sabor de uma Pizza
+pizzaRouter.put('/pizzas/atualizar/:id', (req, res) => {
     const { id } = req.params;
-    const { nome } = req.body;
+    const { sabor } = req.body;
 
-    pizzas[id] = nome;
+    menu[id].sabor = sabor;
 
-    return res.json(pizzas);
+    return res.json(menu);
 });
 
 // Deletar uma Pizza
-pizzaRouter.delete('/usuarios/:id', (req, res) => {
+pizzaRouter.delete('/pizzas/deletar/:id', (req, res) => {
     const { id } = req.params;
 
-    usuarios.splice(id, 1);
-    return res.json({"message": "O pedido foi deletado"});
+    menu.splice(id, 1);
+    return res.json({"message": "A pizza foi deletada"});
 });
 
 module.exports = pizzaRouter;
