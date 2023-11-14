@@ -1,54 +1,55 @@
 const express = require('express');
 
-const Pizza = require('./classe.js');
-
 const pizzaRouter = express.Router();
 
-let menu = [
-    new Pizza(0, "Portuguesa", "P", 18.5),
-    new Pizza(1, "Calabresa", "M", 22.5),
-    new Pizza(2, "Portuguesa", "G", 25.5),
-    new Pizza(3, "Mista", "P", 15.5)
-]
+let pedido = [
+    {sabor: "Calabresa", tamanho: "P", valor: 15.3},
+    {sabor: "Portuguesa", tamanho: "M", valor: 22.3},
+    {sabor: "Calabresa", tamanho: "G", valor: 35.3}
+];
 
 // Listar Pizzas
-pizzaRouter.get('/pizzas', (req, res) => {
-    return res.json(menu);
+pizzaRouter.get('/pedido', (req, res) => {
+    return res.json(pedido);
 });
 
 // Listar uma Pizza
-pizzaRouter.get('/pizzas/:id', (req, res) => {
+pizzaRouter.get('/pedido/:id', (req, res) => {
     let { id } = req.params;
     
-    return res.json(menu[id]);
+    return res.json(pedido[id-1]);
 });
 
 // Cadastrar uma Pizza
-pizzaRouter.post('/pizzas/cadastrar', (req, res) => {
+pizzaRouter.post('/pedido/cadastrar', (req, res) => {
     const pizza = req.body;
 
-    const id = menu.length + 1;
-    nova_pizza = new Pizza(id, pizza.sabor, pizza.tamanho, pizza.valor);
-    menu.push(nova_pizza);
+    pedido.push(pizza);
 
-    return res.json(menu);
+    return res.json(pedido);
 });
 
 // Atualiza o sabor de uma Pizza
-pizzaRouter.put('/pizzas/atualizar/:id', (req, res) => {
+pizzaRouter.put('/pedido/atualizar/:id', (req, res) => {
     const { id } = req.params;
-    const { sabor } = req.body;
+    const { atributo, valor } = req.body;
 
-    menu[id].sabor = sabor;
+    if (atributo == "sabor") {
+        pedido[id-1].sabor = valor;
+    } else if (atributo == "tamanho") {
+        pedido[id-1].tamanho = valor;
+    } else if (atributo == "valor") {
+        pedido[id-1].valor = valor;
+    }
 
-    return res.json(menu);
+    return res.json(pedido);
 });
 
 // Deletar uma Pizza
-pizzaRouter.delete('/pizzas/deletar/:id', (req, res) => {
+pizzaRouter.delete('/pedido/deletar/:id', (req, res) => {
     const { id } = req.params;
 
-    menu.splice(id, 1);
+    pedido.splice(id, 1);
     return res.json({"message": "A pizza foi deletada"});
 });
 
