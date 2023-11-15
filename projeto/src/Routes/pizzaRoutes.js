@@ -1,56 +1,108 @@
 const express = require('express');
-
 const pizzaRouter = express.Router();
 
-let pedido = [
-    {sabor: "Calabresa", tamanho: "P", valor: 15.3},
-    {sabor: "Portuguesa", tamanho: "M", valor: 22.3},
-    {sabor: "Calabresa", tamanho: "G", valor: 35.3}
-];
+let pedido = []
 
-// Listar Pizzas
-pizzaRouter.get('/pedido', (req, res) => {
+// Listar Pedidos
+pizzaRouter.get('/pedidos', (req, res) => {
     return res.json(pedido);
 });
 
-// Listar uma Pizza
-pizzaRouter.get('/pedido/:id', (req, res) => {
+// Listar um Pedido
+pizzaRouter.get('/pedidos/:id', (req, res) => {
     let { id } = req.params;
     
-    return res.json(pedido[id-1]);
+    return res.json(pedido[id]);
 });
 
-// Cadastrar uma Pizza
-pizzaRouter.post('/pedido/cadastrar', (req, res) => {
-    const pizza = req.body;
+// Cadastrar um Pedido
+pizzaRouter.post('/pedidos/cadastrar', (req, res) => {
+    const { sabor, tamanho, valor } = req.body;
 
-    pedido.push(pizza);
+    // Crie uma nova instância de Pizza
+    const novaPizza = {
+        id: pedido.length,
+        sabor,
+        tamanho,
+        valor
+    };
 
-    return res.json(pedido);
+    // Adicione a nova pizza à lista de pedidos
+    pedido.push(novaPizza);
+
+    return res.json({ message: 'Pedido cadastrado com sucesso', Pedido: novaPizza });
 });
 
-// Atualiza o sabor de uma Pizza
-pizzaRouter.put('/pedido/atualizar/:id', (req, res) => {
+// Atualizar um Pedido
+pizzaRouter.put('/pedidos/atualizar/:id', (req, res) => {
     const { id } = req.params;
-    const { atributo, valor } = req.body;
+    const { sabor, tamanho} = req.body;
 
-    if (atributo == "sabor") {
-        pedido[id-1].sabor = valor;
-    } else if (atributo == "tamanho") {
-        pedido[id-1].tamanho = valor;
-    } else if (atributo == "valor") {
-        pedido[id-1].valor = valor;
+    // Encontre a pizza no pedido com base no ID
+    const pizza = pedido.find(pizza => pizza.id === Number(id));
+
+    // Verifique se a pizza existe no pedido
+    if (!pizza) {
+        return res.status(404).json({ message: 'Pizza não encontrada' });
     }
 
-    return res.json(pedido);
+    // Atualize os atributos fornecidos na requisição, se estiverem presentes
+    if (sabor) {
+        pizza.sabor = sabor;
+    }
+    if (tamanho) {
+        pizza.tamanho = tamanho;
+    }
+
+    // Retorna apenas os atributos necessários na resposta
+    const pizzaAtualizada = {
+        id: pizza.id,
+        sabor: pizza.sabor,
+        tamanho: pizza.tamanho,
+        valor: pizza.valor
+    };
+
+    return res.json({ message: 'Pedido atualizado com sucesso', Pedido: pizzaAtualizada });
 });
 
-// Deletar uma Pizza
-pizzaRouter.delete('/pedido/deletar/:id', (req, res) => {
+// Rota para aplicar desconto de 10% em pizzas tamanho "G"
+pizzaRouter.put('/pedidos/desconto/G', (req, res) => {
+    const descontoPercentual = 0.10; // 10%
+
+    // Filtra as pizzas na lista que têm o tamanho "G"
+    const pizzasTamanhoG = pedido.filter(pizza => pizza.tamanho.toUpperCase() === 'G');
+
+    // Verifica se há pizzas para aplicar desconto
+    if (pizzasTamanhoG.length === 0) {
+        return res.status(404).json({ message: 'Não há pizzas de tamanho G na lista' });
+    }
+
+    // Aplica o desconto de 10% às pizzas encontradas
+    pizzasTamanhoG.forEach(pizza => {
+        pizza.valor -= pizza.valor * descontoPercentual;
+    });
+
+    // Retorna a lista atualizada com desconto
+    return res.json({ message: 'Desconto de 10% aplicado às pizzas de tamanho G', pedido});
+});
+
+
+// Deletar um Pedido
+pizzaRouter.delete('/pedidos/deletar/:id', (req, res) => {
     const { id } = req.params;
 
-    pedido.splice(id, 1);
-    return res.json({"message": "A pizza foi deletada"});
+     // Encontre o índice da pizza no pedido com base no ID
+    const pizza = pedido.findIndex(pizza => pizza.id === Number(id));
+
+    // Verifique se a pizza existe no pedido
+    if (pizza === -1) {
+        return res.status(404).json({ message: 'Pizza não encontrada' });
+    }
+
+    // Remova a pizza da lista de pedidos usando o índice encontrado
+    const pizzaRemovida = pedido.splice(pizza, 1)[0];
+
+    return res.json({ message: 'Pedido removido com sucesso', Pedido: pizzaRemovida });
 });
 
 module.exports = pizzaRouter;
